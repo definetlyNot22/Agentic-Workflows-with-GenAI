@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GenAI Agentic Workflow Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: rgba(16, 23, 38, 0.75);
+      --card-border: rgba(56, 189, 248, 0.15);
+      --accent-cyan: #38bdf8;
+      --accent-indigo: #818cf8;
+      --accent-emerald: #34d399;
+      --accent-amber: #fbbf24;
+      --accent-rose: #f43f5e;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: 'Inter', -apple-system, sans-serif;
+      min-height: 100vh;
+      padding: 24px;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(129, 140, 248, 0.05) 0%, transparent 40%);
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 28px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      backdrop-filter: blur(12px);
+    }
+
+    .logo-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .badge-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #0284c7, #6366f1);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .model-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--accent-cyan);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-emerald);
+      box-shadow: 0 0 8px var(--accent-emerald);
+    }
+
+    /* Pipeline Stage Ribbon */
+    .pipeline-tracker {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .stage-card {
+      background: var(--card-bg);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .stage-card.active {
+      border-color: var(--accent-cyan);
+      background: rgba(56, 189, 248, 0.08);
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.15);
+    }
+
+    .stage-card.completed {
+      border-color: var(--accent-emerald);
+      background: rgba(52, 211, 153, 0.05);
+    }
+
+    .stage-number {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .stage-card.active .stage-number {
+      background: var(--accent-cyan);
+      color: #000;
+    }
+
+    .stage-card.completed .stage-number {
+      background: var(--accent-emerald);
+      color: #000;
+    }
+
+    .stage-info .title {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .stage-info .desc {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Goal Input Card */
+    .input-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 24px;
+      backdrop-filter: blur(12px);
+    }
+
+    .card-title {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 14px;
+    }
+
+    textarea {
+      flex: 1;
+      background: rgba(9, 13, 22, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 14px 16px;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 14px;
+      resize: vertical;
+      min-height: 52px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    textarea:focus {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+    }
+
+    .btn-launch {
+      background: linear-gradient(135deg, #0ea5e9, #6366f1);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 0 28px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-launch:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(56, 189, 248, 0.35);
+    }
+
+    .btn-launch:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .presets-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+      align-items: center;
+    }
+
+    .preset-label {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .chip {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 9999px;
+      padding: 5px 12px;
+      font-size: 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .chip:hover {
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+      background: rgba(56, 189, 248, 0.08);
+    }
+
+    /* Main Workspace Layout */
+    .workspace {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    /* Plan & Log Cards */
+    .panel {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      backdrop-filter: blur(12px);
+      min-height: 480px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 12px;
+    }
+
+    .panel-title {
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Telemetry Feed */
+    .log-feed {
+      flex: 1;
+      overflow-y: auto;
+      max-height: 460px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      padding-right: 6px;
+    }
+
+    .log-item {
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.3);
+      border-left: 3px solid var(--text-dim);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .log-item.task {
+      border-left-color: var(--accent-cyan);
+    }
+
+    .log-item.tool {
+      border-left-color: var(--accent-amber);
+      background: rgba(251, 191, 36, 0.05);
+    }
+
+    .log-item.critic {
+      border-left-color: var(--accent-indigo);
+      background: rgba(129, 140, 248, 0.05);
+    }
+
+    .log-header {
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-muted);
+      font-size: 11px;
+    }
+
+    .log-text {
+      color: var(--text-main);
+      line-height: 1.4;
+    }
+
+    /* Critic Rubric Scorecard */
+    .rubric-box {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .metric-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .metric-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .progress-bar-bg {
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-indigo));
+      width: 0%;
+      transition: width 0.8s ease-in-out;
+    }
+
+    /* Final Deliverable Preview */
+    .deliverable-content {
+      flex: 1;
+      overflow-y: auto;
+      max-height: 480px;
+      background: rgba(9, 13, 22, 0.6);
+      border-radius: 12px;
+      padding: 18px;
+      font-size: 13.5px;
+      line-height: 1.6;
+      color: #e2e8f0;
+    }
+
+    .deliverable-content h1, 
+    .deliverable-content h2, 
+    .deliverable-content h3 {
+      color: var(--accent-cyan);
+      margin-top: 14px;
+      margin-bottom: 8px;
+    }
+
+    .deliverable-content ul, 
+    .deliverable-content ol {
+      margin-left: 20px;
+      margin-bottom: 12px;
+    }
+
+    .btn-copy {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-main);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-copy:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--accent-cyan);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="logo-group">
+        <div class="badge-icon">⚡</div>
+        <div>
+          <h1>GenAI Agentic Workflow System</h1>
+          <div class="subtitle">Multi-Agent Orchestration • Autonomous Tool Use • Reflection Loops</div>
+        </div>
+      </div>
+      <div class="model-badge">
+        <div class="dot"></div>
+        <span>gemini-3.8-flash</span>
+      </div>
+    </header>
+
+    <!-- Pipeline Ribbon -->
+    <div class="pipeline-tracker">
+      <div class="stage-card" id="stage-1">
+        <div class="stage-number">1</div>
+        <div class="stage-info">
+          <div class="title">Planning</div>
+          <div class="desc">Goal Decomposition</div>
+        </div>
+      </div>
+      <div class="stage-card" id="stage-2">
+        <div class="stage-number">2</div>
+        <div class="stage-info">
+          <div class="title">Execution</div>
+          <div class="desc">Tools & Computation</div>
+        </div>
+      </div>
+      <div class="stage-card" id="stage-3">
+        <div class="stage-number">3</div>
+        <div class="stage-info">
+          <div class="title">Reflection</div>
+          <div class="desc">Critic Audit & Refinement</div>
+        </div>
+      </div>
+      <div class="stage-card" id="stage-4">
+        <div class="stage-number">4</div>
+        <div class="stage-info">
+          <div class="title">Deliverable</div>
+          <div class="desc">Approved Synthesis</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input Card -->
+    <div class="input-card">
+      <div class="card-title">Define Mission Objective</div>
+      <div class="input-row">
+        <textarea id="goal-input" placeholder="Specify your complex multi-step objective...">Analyze competitive landscape and 3-year market projections for Enterprise Agentic AI</textarea>
+        <button class="btn-launch" id="btn-run" onclick="startWorkflow()">
+          <span id="btn-text">Execute Workflow</span>
+        </button>
+      </div>
+      <div class="presets-row">
+        <span class="preset-label">Presets:</span>
+        <div class="chip" onclick="setPreset('Analyze enterprise market landscape and 3-year projections for Agentic AI workflows')">📈 Market Intelligence</div>
+        <div class="chip" onclick="setPreset('Design high-throughput multi-agent architecture with reflection and tool grounding')">🏛️ Architecture Blueprint</div>
+        <div class="chip" onclick="setPreset('Evaluate security audit and guardrails for autonomous tool-calling agents')">🛡️ Agent Security Audit</div>
+      </div>
+    </div>
+
+    <!-- Telemetry Workspace -->
+    <div class="workspace">
+      <!-- Left: Real-time Telemetry & Execution Log -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>📡 Live Agent Telemetry</span>
+          </div>
+          <span id="status-indicator" style="font-size: 12px; color: var(--text-dim); font-family: 'JetBrains Mono';">Ready</span>
+        </div>
+        <div class="log-feed" id="log-feed">
+          <div class="log-item">
+            <div class="log-header"><span>System</span><span>00:00:00</span></div>
+            <div class="log-text">Awaiting workflow execution initiation...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Critic Scorecard & Final Synthesis -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>📋 Executive Deliverable & Critic Audit</span>
+          </div>
+          <button class="btn-copy" onclick="copyReport()">Copy Markdown</button>
+        </div>
+
+        <!-- Reflection Rubric Box -->
+        <div class="rubric-box" id="rubric-box" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 12px; font-weight: 600; text-transform: uppercase; color: var(--accent-indigo);">Critic Reflection Audit</span>
+            <span id="audit-badge" style="font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 600;"></span>
+          </div>
+
+          <div class="metric-row">
+            <div class="metric-header"><span>Factual Grounding</span><span id="score-fact">-</span></div>
+            <div class="progress-bar-bg"><div class="progress-bar-fill" id="fill-fact"></div></div>
+          </div>
+
+          <div class="metric-row">
+            <div class="metric-header"><span>Analytical Depth</span><span id="score-depth">-</span></div>
+            <div class="progress-bar-bg"><div class="progress-bar-fill" id="fill-depth"></div></div>
+          </div>
+
+          <div class="metric-row">
+            <div class="metric-header"><span>Actionability</span><span id="score-act">-</span></div>
+            <div class="progress-bar-bg"><div class="progress-bar-fill" id="fill-act"></div></div>
+          </div>
+
+          <div id="critic-feedback-text" style="font-size: 12px; color: var(--text-muted); line-height: 1.4; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px;"></div>
+        </div>
+
+        <div class="deliverable-content" id="deliverable-view">
+          <em style="color: var(--text-dim);">Execute workflow to view generated synthesis and audit metrics.</em>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let rawMarkdown = "";
+
+    function setPreset(text) {
+      document.getElementById('goal-input').value = text;
+    }
+
+    function updateStage(activeStageNumber) {
+      for (let i = 1; i <= 4; i++) {
+        const el = document.getElementById(`stage-${i}`);
+        el.classList.remove('active', 'completed');
+        if (i < activeStageNumber) {
+          el.classList.add('completed');
+        } else if (i === activeStageNumber) {
+          el.classList.add('active');
+        }
+      }
+    }
+
+    function appendLog(category, title, content) {
+      const feed = document.getElementById('log-feed');
+      const time = new Date().toLocaleTimeString();
+      const item = document.createElement('div');
+      item.className = `log-item ${category}`;
+      item.innerHTML = `
+        <div class="log-header">
+          <span>${title}</span>
+          <span>${time}</span>
+        </div>
+        <div class="log-text">${content}</div>
+      `;
+      feed.appendChild(item);
+      feed.scrollTop = feed.scrollHeight;
+    }
+
+    function startWorkflow() {
+      const goal = document.getElementById('goal-input').value.trim();
+      if (!goal) return;
+
+      const btn = document.getElementById('btn-run');
+      const btnText = document.getElementById('btn-text');
+      const statusIndicator = document.getElementById('status-indicator');
+      const logFeed = document.getElementById('log-feed');
+      const deliverableView = document.getElementById('deliverable-view');
+      const rubricBox = document.getElementById('rubric-box');
+
+      btn.disabled = true;
+      btnText.innerText = "Running Agents...";
+      statusIndicator.innerText = "Executing";
+      statusIndicator.style.color = "var(--accent-cyan)";
+      logFeed.innerHTML = "";
+      deliverableView.innerHTML = `<em style="color: var(--accent-cyan);">Generating synthesis...</em>`;
+      rubricBox.style.display = 'none';
+
+      updateStage(1);
+      appendLog('task', 'Supervisor Agent', `Workflow initialized with goal: "${goal}"`);
+
+      const sseUrl = `/api/stream?goal=${encodeURIComponent(goal)}&simulation=true`;
+      const eventSource = new EventSource(sseUrl);
+
+      eventSource.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          const type = msg.type;
+          const data = msg.payload;
+
+          if (type === "phase_change") {
+            appendLog('task', 'Phase Transition', `=== ${data.phase} ===`);
+            if (data.phase.includes("Planning")) updateStage(1);
+            else if (data.phase.includes("Execution")) updateStage(2);
+            else if (data.phase.includes("Reflection")) updateStage(3);
+          } 
+          else if (type === "plan_generated") {
+            const planList = data.plan.map(t => `Step ${t.step}: ${t.title} [${t.agent} -> ${t.tool}]`).join('<br>');
+            appendLog('task', 'Planner Agent', `Generated ${data.plan.length} sub-tasks:<br>${planList}`);
+          }
+          else if (type === "task_start") {
+            appendLog('task', `${data.agent} Agent`, `Starting Step ${data.step}: <b>${data.title}</b>`);
+          }
+          else if (type === "task_finish") {
+            const resp = data.response;
+            if (resp && resp.tool_calls_made && resp.tool_calls_made.length > 0) {
+              resp.tool_calls_made.forEach(tc => {
+                appendLog('tool', 'Tool Executed', `<b>${tc.tool}</b> with args: ${JSON.stringify(tc.args)}`);
+              });
+            }
+            appendLog('task', `${data.agent} Agent`, `Step ${data.step} completed.`);
+          }
+          else if (type === "reflection_finish") {
+            const evalRes = data.evaluation;
+            rubricBox.style.display = 'flex';
+            const badge = document.getElementById('audit-badge');
+            
+            if (evalRes.passed) {
+              badge.innerText = `PASSED (${evalRes.score}/100)`;
+              badge.style.background = 'rgba(52, 211, 153, 0.2)';
+              badge.style.color = 'var(--accent-emerald)';
+            } else {
+              badge.innerText = `NEEDS REVISION (${evalRes.score}/100)`;
+              badge.style.background = 'rgba(244, 63, 94, 0.2)';
+              badge.style.color = 'var(--accent-rose)';
+            }
+
+            const c = evalRes.criteria_evaluated || {};
+            document.getElementById('score-fact').innerText = `${c.factual_grounding || 85}%`;
+            document.getElementById('fill-fact').style.width = `${c.factual_grounding || 85}%`;
+            document.getElementById('score-depth').innerText = `${c.analytical_depth || 85}%`;
+            document.getElementById('fill-depth').style.width = `${c.analytical_depth || 85}%`;
+            document.getElementById('score-act').innerText = `${c.actionability || 85}%`;
+            document.getElementById('fill-act').style.width = `${c.actionability || 85}%`;
+            
+            document.getElementById('critic-feedback-text').innerHTML = `<b>Critic Feedback:</b> ${evalRes.feedback}`;
+            appendLog('critic', 'Critic Agent', `Audit score: ${evalRes.score}/100 - ${evalRes.passed ? 'PASSED' : 'REVISION TRIGGERED'}`);
+          }
+          else if (type === "workflow_finish") {
+            updateStage(4);
+            const state = data.state;
+            rawMarkdown = state.final_output || "";
+            deliverableView.innerHTML = marked.parse(rawMarkdown);
+            appendLog('task', 'Supervisor Agent', 'Workflow completed successfully!');
+            statusIndicator.innerText = "Completed";
+            statusIndicator.style.color = "var(--accent-emerald)";
+            btn.disabled = false;
+            btnText.innerText = "Execute Workflow";
+            eventSource.close();
+          }
+        } catch (e) {
+          console.error("Error parsing SSE event:", e);
+        }
+      };
+
+      eventSource.onerror = (err) => {
+        console.error("SSE stream error", err);
+        eventSource.close();
+        btn.disabled = false;
+        btnText.innerText = "Execute Workflow";
+        statusIndicator.innerText = "Finished";
+      };
+    }
+
+    function copyReport() {
+      if (!rawMarkdown) return;
+      navigator.clipboard.writeText(rawMarkdown).then(() => {
+        alert("Report markdown copied to clipboard!");
+      });
+    }
+  </script>
+</body>
+</html>
